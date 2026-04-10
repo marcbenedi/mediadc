@@ -206,16 +206,13 @@ class PythonUtilsService {
 			return ['downloaded' => false, 'error' => 'HTTP ' . $httpCode];
 		}
 
-		// Extract
-		try {
-			$phar = new \PharData($tmpFile);
-			$phar->extractTo($targetDir, null, true);
-		} catch (\Exception $e) {
-			@unlink($tmpFile);
-			$this->logger->error('Binary extraction failed: ' . $e->getMessage());
-			return ['downloaded' => false, 'error' => $e->getMessage()];
-		}
+		// Extract using tar (PharData loads the whole file into memory and OOMs on low-memory servers)
+		exec('tar xzf ' . escapeshellarg($tmpFile) . ' -C ' . escapeshellarg($targetDir) . ' 2>&1', $tarOutput, $tarResult);
 		@unlink($tmpFile);
+		if ($tarResult !== 0) {
+			$this->logger->error('Binary extraction failed: ' . implode("\n", $tarOutput));
+			return ['downloaded' => false, 'error' => 'tar extraction failed'];
+		}
 
 		// Make executable
 		if (file_exists($binaryPath . '/main')) {
