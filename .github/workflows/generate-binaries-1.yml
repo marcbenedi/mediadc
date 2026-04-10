@@ -1,8 +1,0 @@
-name: Generate Binaries-1
-
-on:
-  workflow_dispatch:
-
-jobs:
-  bundler-prepare-binaries:
-    uses: cloud-py-api/py_bundler/.github/workflows/generate-binaries-1.yml@main
