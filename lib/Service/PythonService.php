@@ -58,14 +58,17 @@ class PythonService {
 		array $env = [],
 		bool $binary = false,
 	): ?array {
-		$cwd = $this->getWorkingDirectory($appId);
-
 		$formattedParams = $this->formatParams($scriptParams);
 
+		// Absolute paths are used as-is; relative paths get the app directory prepended
+		$scriptPath = str_starts_with($scriptName, '/')
+			? $scriptName
+			: $this->getWorkingDirectory($appId) . $scriptName;
+
 		if ($binary) {
-			$cmd = escapeshellarg($cwd . $scriptName) . ' ' . $formattedParams;
+			$cmd = escapeshellarg($scriptPath) . ' ' . $formattedParams;
 		} else {
-			$cmd = 'python3 ' . escapeshellarg($cwd . $scriptName) . ' ' . $formattedParams;
+			$cmd = 'python3 ' . escapeshellarg($scriptPath) . ' ' . $formattedParams;
 		}
 
 		$envPrefix = $this->formatEnv($env);

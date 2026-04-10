@@ -179,7 +179,7 @@ import { generateUrl } from '@nextcloud/router'
 import { mapActions, mapGetters } from 'vuex'
 
 import DetailsList from '../components/details/DetailsList.vue'
-import Formats from '../mixins/Formats.js'
+import { formatBytes, parseUnixTimestamp, getStatusBadge, parseTargetMtype } from '../composables/useFormats.js'
 import TasksEdit from '../components/tasks/TasksEdit.vue'
 import DetailsExport from '../components/details/DetailsExport.vue'
 
@@ -200,7 +200,6 @@ export default {
 		ContentCopy,
 		FileExportOutline,
 	},
-	mixins: [Formats],
 	props: {
 		rootTitle: {
 			type: String,
@@ -259,6 +258,10 @@ export default {
 		this.$store.commit('setDetailsInfo', { filestotal: 0, filessize: 0 })
 	},
 	methods: {
+		formatBytes,
+		parseUnixTimestamp,
+		getStatusBadge,
+		parseTargetMtype,
 		...mapActions([
 			'getTaskDetails',
 			'getTaskInfo',

@@ -42,6 +42,8 @@ FIRST_FRAME_RESOLUTION = 64
 
 
 def process_videos(settings: dict, fs_objs: list[FsNodeInfo]):
+    from .db_requests import increase_processed_files_count
+
     mdc_videos_info = load_videos_caches(fs_objs)
     for mdc_video_info in mdc_videos_info:
         if mdc_video_info["skipped"] is not None:
@@ -65,6 +67,7 @@ def process_videos(settings: dict, fs_objs: list[FsNodeInfo]):
                 mdc_video_info["hash"] = arr_hash_from_bytes(mdc_video_info["hash"])
         if mdc_video_info["hash"] is not None:
             process_video_record(settings["precision_vid"], mdc_video_info)
+        increase_processed_files_count(settings["id"], 1)
 
 
 def process_video_record(precision: int, mdc_video_info: MdcVideoInfo):

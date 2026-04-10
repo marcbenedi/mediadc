@@ -226,6 +226,21 @@ class PythonUtilsService {
 	}
 
 	/**
+	 * Get the resolved path to the pre-compiled binary, or null if not found.
+	 */
+	public function getBinaryPath(string $appId): ?string {
+		$ncDataFolder = $this->config->getSystemValueString('datadirectory', '');
+		$ncInstanceId = $this->config->getSystemValueString('instanceid', '');
+		if ($ncDataFolder === '' || $ncInstanceId === '') {
+			return null;
+		}
+		$binaryDir = $ncDataFolder . '/appdata_' . $ncInstanceId . '/' . $appId
+			. '/binaries/' . $appId . '_' . $this->getBinaryName();
+		$binaryPath = $binaryDir . '/main';
+		return file_exists($binaryPath) ? $binaryPath : null;
+	}
+
+	/**
 	 * Get system information for the admin settings page.
 	 */
 	public function getSystemInfo(string $appId = ''): array {
@@ -241,6 +256,13 @@ class PythonUtilsService {
 			'arch' => php_uname('m'),
 			'exec_enabled' => $this->isFunctionEnabled('exec'),
 		];
+
+		// Check binary status
+		if ($appId !== '') {
+			$binaryPath = $this->getBinaryPath($appId);
+			$info['binary_path'] = $binaryPath;
+			$info['binary_found'] = $binaryPath !== null;
+		}
 
 		// Check for Python
 		if ($this->isFunctionEnabled('exec')) {

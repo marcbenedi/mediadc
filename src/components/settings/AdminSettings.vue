@@ -27,6 +27,44 @@
 		<h2 style="padding: 30px 30px 0 30px; font-size: 24px;">
 			{{ t('mediadc', 'MediaDC settings') }}
 		</h2>
+		<NcSettingsSection v-if="systemInfo" :name="t('mediadc', 'System Status')">
+			<NcNoteCard v-if="!systemInfo.exec_enabled" type="error">
+				{{ t('mediadc', 'PHP exec() function is disabled. MediaDC cannot run tasks. Enable exec() in your PHP configuration.') }}
+			</NcNoteCard>
+			<ul class="system-status-list">
+				<li>
+					<span :class="systemInfo.exec_enabled ? 'status-ok' : 'status-error'">
+						{{ systemInfo.exec_enabled ? '✓' : '✗' }}
+					</span>
+					{{ t('mediadc', 'PHP exec()') }}:
+					{{ systemInfo.exec_enabled ? t('mediadc', 'enabled') : t('mediadc', 'disabled') }}
+				</li>
+				<li v-if="systemInfo.binary_found !== undefined">
+					<span :class="systemInfo.binary_found ? 'status-ok' : 'status-warn'">
+						{{ systemInfo.binary_found ? '✓' : '−' }}
+					</span>
+					{{ t('mediadc', 'Pre-compiled binary') }}:
+					<template v-if="systemInfo.binary_found">
+						{{ systemInfo.binary_path }}
+					</template>
+					<template v-else>
+						{{ t('mediadc', 'not found (using system Python)') }}
+					</template>
+				</li>
+				<li v-if="!systemInfo.binary_found || !python_binary">
+					<span :class="systemInfo.python_version && systemInfo.python_version !== 'not found' && systemInfo.python_version !== 'exec() disabled' ? 'status-ok' : 'status-error'">
+						{{ systemInfo.python_version && systemInfo.python_version !== 'not found' && systemInfo.python_version !== 'exec() disabled' ? '✓' : '✗' }}
+					</span>
+					Python: {{ systemInfo.python_version || t('mediadc', 'unknown') }}
+				</li>
+				<li v-if="!systemInfo.binary_found || !python_binary">
+					<span :class="systemInfo.ffmpeg_available ? 'status-ok' : 'status-error'">
+						{{ systemInfo.ffmpeg_available ? '✓' : '✗' }}
+					</span>
+					ffmpeg: {{ systemInfo.ffmpeg_available ? t('mediadc', 'available') : t('mediadc', 'not found') }}
+				</li>
+			</ul>
+		</NcSettingsSection>
 		<NcLoadingIcon v-if="loadingSettings" :size="48" />
 		<div v-if="settings.length > 0 && !loadingSettings" class="settings">
 			<NcSettingsSection :name="t('mediadc', mappedSettings.hashing_algorithm.display_name)"
@@ -66,7 +104,7 @@
 			</NcSettingsSection>
 			<NcSettingsSection :name="t('mediadc',mappedSettings.ignore_orientation.display_name)"
 				:description="t('mediadc', mappedSettings.ignore_orientation.description)">
-				<NcCheckboxRadioSwitch v-model:checked="ignore_orientation" @update:checked="updateIgnoreOrientation">
+				<NcCheckboxRadioSwitch v-model="ignore_orientation" @update:modelValue="updateIgnoreOrientation">
 					{{ t('mediadc', 'Ignore image orientation') }}
 				</NcCheckboxRadioSwitch>
 			</NcSettingsSection>
@@ -140,7 +178,7 @@
 			</NcSettingsSection>
 			<NcSettingsSection :name="t('mediadc', mappedSettings.python_binary.display_name)"
 				:description="t('mediadc', mappedSettings.python_binary.description)">
-				<NcCheckboxRadioSwitch v-model:checked="python_binary" @update:checked="updatePythonBinary">
+				<NcCheckboxRadioSwitch v-model="python_binary" @update:modelValue="updatePythonBinary">
 					{{ t('mediadc', 'Use pre-compiled Python binaries') }}
 				</NcCheckboxRadioSwitch>
 			</NcSettingsSection>
@@ -176,6 +214,7 @@ import {
 	NcSettingsSection,
 	NcCheckboxRadioSwitch,
 	NcLoadingIcon,
+	NcNoteCard,
 } from '@nextcloud/vue'
 
 import PlusThick from 'vue-material-design-icons/PlusThick.vue'
@@ -192,6 +231,7 @@ export default {
 		NcEmptyContent,
 		NcListItem,
 		NcLoadingIcon,
+		NcNoteCard,
 		PlusThick,
 		NcSettingsSection,
 		NcCheckboxRadioSwitch,
@@ -200,6 +240,7 @@ export default {
 	data() {
 		return {
 			loadingSettings: false,
+			systemInfo: null,
 			settings: [],
 			algorithms: [],
 			mappedSettings: {},
@@ -214,6 +255,9 @@ export default {
 		}
 	},
 	beforeMount() {
+		axios.get(generateUrl('/apps/mediadc/api/v1/system-info')).then(res => {
+			this.systemInfo = res.data
+		})
 		this.settings = loadState('mediadc', 'settings', null)
 		if (this.settings !== null && this.settings.length > 0) {
 			this.mapSettings(this.settings)
@@ -371,3 +415,34 @@ export default {
 	},
 }
 </script>
+
+<style scoped>
+.system-status-list {
+	list-style: none;
+	padding: 0;
+	margin: 8px 0;
+}
+
+.system-status-list li {
+	padding: 4px 0;
+	font-size: 14px;
+}
+
+.status-ok {
+	color: var(--color-success);
+	font-weight: bold;
+	margin-inline-end: 6px;
+}
+
+.status-error {
+	color: var(--color-error);
+	font-weight: bold;
+	margin-inline-end: 6px;
+}
+
+.status-warn {
+	color: var(--color-warning);
+	font-weight: bold;
+	margin-inline-end: 6px;
+}
+</style>

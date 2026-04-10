@@ -1,7 +1,55 @@
-> **Note:** This is a fork of [cloud-py-api/mediadc](https://github.com/cloud-py-api/mediadc),
-> which was archived by the original maintainers. This fork updates the app to work
-> with Nextcloud 33, removes the `cloud_py_api` dependency, and fixes various
-> compatibility issues. AI tooling (Claude Code) was heavily used in the update process.
+# MediaDC (Fork)
+
+**Collect photo and video duplicates to save your cloud storage space.**
+
+This is a fork of [cloud-py-api/mediadc](https://github.com/cloud-py-api/mediadc) by [Andrey Borysenko](https://github.com/andrey18106) and [Alexander Piskun](https://github.com/bigcat88), who built an amazing tool for finding duplicate media in Nextcloud. Huge thanks to them for all the work they put into this project.
+
+The original repository was archived as the maintainers no longer had capacity to keep it going. I forked it because I rely on MediaDC for my own Nextcloud setup and wanted to keep it working with recent versions.
+
+This fork was updated almost entirely using LLM tooling ([Claude Code](https://claude.ai/code)). It brings compatibility with **Nextcloud 33**, removes the `cloud_py_api` dependency, migrates the frontend to **Vue 3**, and ships **pre-compiled Python binaries** so you don't need Python installed on your server.
+
+## Installation
+
+### Option 1: Download from releases (recommended)
+
+```bash
+cd /var/www/html/apps
+wget https://github.com/marcbenedi/mediadc/releases/latest/download/mediadc.tar.gz
+tar xzf mediadc.tar.gz && rm mediadc.tar.gz
+sudo -u www-data php /var/www/html/occ app:enable mediadc
+```
+
+The release package includes pre-compiled Python binaries — no Python, pip, or ffmpeg needed on the server.
+
+### Option 2: Install from source
+
+```bash
+cd /var/www/html/apps
+git clone https://github.com/marcbenedi/mediadc.git
+cd mediadc
+npm ci && npm run build
+```
+
+Then install the Python dependencies on the server:
+
+```bash
+apt install python3-pip python3-dev build-essential ffmpeg
+pip install -r requirements.txt
+```
+
+Enable the app:
+
+```bash
+sudo -u www-data php /var/www/html/occ app:enable mediadc
+```
+
+When installing from source, the app will try to download a pre-compiled binary on first enable. If that fails, it falls back to using the system Python — in that case make sure python3, pip, and ffmpeg are installed.
+
+---
+
+*Everything below this line is the original README from the upstream repository.*
+
+---
 
 ## This Repository is Archived
 

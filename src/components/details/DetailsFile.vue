@@ -72,7 +72,7 @@
 			<div class="actions" style="display: flex;">
 				<NcCheckboxRadioSwitch v-tooltip="{ content: t('mediadc', 'Select file'), placement: 'top' }"
 					class="mediadc-checkbox-only"
-					v-model:checked="checked" />
+					v-model="checked" />
 				<NcButton v-tooltip="{ content: t('mediadc', 'Delete file'), placement: 'top' }"
 					type="tertiary"
 					:aria-label="t('mediadc', 'Delete file')"
@@ -105,7 +105,7 @@ import { NcButton, NcCheckboxRadioSwitch } from '@nextcloud/vue'
 
 import { mapGetters } from 'vuex'
 
-import Formats from '../../mixins/Formats.js'
+import { formatBytes, parseUnixTimestamp, getStatusBadge, parseTargetMtype } from '../../composables/useFormats.js'
 
 export default {
 	name: 'DetailsFile',
@@ -113,7 +113,6 @@ export default {
 		NcButton,
 		NcCheckboxRadioSwitch,
 	},
-	mixins: [Formats],
 	props: {
 		file: {
 			type: Object,
@@ -187,6 +186,10 @@ export default {
 		unsubscribe('deselectFiles', this.deselect)
 	},
 	methods: {
+		formatBytes,
+		parseUnixTimestamp,
+		getStatusBadge,
+		parseTargetMtype,
 		openFile(file) {
 			const filesList = this.files.map(file => ({
 				basename: file.filename,

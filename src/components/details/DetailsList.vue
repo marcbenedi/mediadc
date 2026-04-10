@@ -36,7 +36,7 @@
 			</h3>
 			<div class="pagination-wrapper">
 				<div class="pagination-sorting">
-					<NcCheckboxRadioSwitch v-model:checked="sortGroups" style="margin-right: 20px;">
+					<NcCheckboxRadioSwitch v-model="sortGroups" style="margin-right: 20px;">
 						{{ t('mediadc', 'Sort groups') }}
 					</NcCheckboxRadioSwitch>
 					<NcButton v-tooltip="t('mediadc', 'Sorting details by files count')"
@@ -204,7 +204,7 @@ import CheckUnderline from 'vue-material-design-icons/CheckUnderline.vue'
 
 import { mapGetters } from 'vuex'
 
-import Formats from '../../mixins/Formats.js'
+import { formatBytes, parseUnixTimestamp, getStatusBadge, parseTargetMtype } from '../../composables/useFormats.js'
 
 import DetailsListItem from './DetailsListItem.vue'
 import Pagination from './Pagination.vue'
@@ -223,7 +223,6 @@ export default {
 		CheckUnderline,
 		NcLoadingIcon,
 	},
-	mixins: [Formats],
 	data() {
 		return {
 			page: 0,
@@ -308,6 +307,10 @@ export default {
 		unsubscribe('openNextDetailGroup', this.openNextDetailGroup)
 	},
 	methods: {
+		formatBytes,
+		parseUnixTimestamp,
+		getStatusBadge,
+		parseTargetMtype,
 		prevGroupsPage() {
 			if (this.page > 0) {
 				this.page -= 1

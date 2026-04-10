@@ -69,7 +69,7 @@ import {
 } from '@nextcloud/vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
-import Formats from '../../mixins/Formats.js'
+import { formatBytes, parseUnixTimestamp, getStatusBadge, parseTargetMtype } from '../../composables/useFormats.js'
 
 export default {
 	name: 'TasksListItem',
@@ -79,7 +79,6 @@ export default {
 		NcListItem,
 		NcProgressBar,
 	},
-	mixins: [Formats],
 	props: {
 		task: {
 			type: Object,
@@ -102,6 +101,10 @@ export default {
 		},
 	},
 	methods: {
+		formatBytes,
+		parseUnixTimestamp,
+		getStatusBadge,
+		parseTargetMtype,
 		...mapActions([
 			'getTasks',
 			'getSettings',

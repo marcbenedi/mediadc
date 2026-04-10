@@ -184,7 +184,7 @@
 					<input v-model="taskName"
 						type="text"
 						:placeholder="t('mediadc', 'Task name')">
-					<NcCheckboxRadioSwitch v-model:checked="finishNotification">
+					<NcCheckboxRadioSwitch v-model="finishNotification">
 						{{ t('mediadc', 'Finish notification') }}
 					</NcCheckboxRadioSwitch>
 				</div>

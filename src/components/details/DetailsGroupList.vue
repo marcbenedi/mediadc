@@ -111,7 +111,7 @@ import { emit } from '@nextcloud/event-bus'
 
 import { NcActions, NcActionButton, NcButton } from '@nextcloud/vue'
 
-import Formats from '../../mixins/Formats.js'
+import { formatBytes, parseUnixTimestamp, getStatusBadge, parseTargetMtype } from '../../composables/useFormats.js'
 import DetailsFile from './DetailsFile.vue'
 
 export default {
@@ -122,7 +122,6 @@ export default {
 		NcActionButton,
 		NcButton,
 	},
-	mixins: [Formats],
 	props: {
 		files: {
 			type: Array,
@@ -179,6 +178,10 @@ export default {
 		},
 	},
 	methods: {
+		formatBytes,
+		parseUnixTimestamp,
+		getStatusBadge,
+		parseTargetMtype,
 		openBatchActionsPopup() {
 			document.addEventListener('click', this.toggleBatchActionsPopup)
 		},

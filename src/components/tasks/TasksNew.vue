@@ -188,7 +188,7 @@
 				type="text"
 				:placeholder="t('mediadc', 'Task name')">
 			<NcCheckboxRadioSwitch v-tooltip="t('mediadc', 'Send notification on task finish')"
-				v-model:checked="finishNotification">
+				v-model="finishNotification">
 				{{ t('mediadc', 'Finish notification') }}
 			</NcCheckboxRadioSwitch>
 		</div>

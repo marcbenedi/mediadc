@@ -204,7 +204,7 @@
 import { getCurrentUser } from '@nextcloud/auth'
 import { generateUrl } from '@nextcloud/router'
 
-import Formats from '../../mixins/Formats.js'
+import { formatBytes, parseUnixTimestamp, getStatusBadge, parseTargetMtype } from '../../composables/useFormats.js'
 import ResolvedListFile from './ResolvedListFile.vue'
 
 import {
@@ -227,9 +227,6 @@ export default {
 		ResolvedListFile,
 		ClipboardListOutline,
 	},
-	mixins: [
-		Formats,
-	],
 	data() {
 		return {
 			thumbSize: 48,
@@ -258,6 +255,10 @@ export default {
 		},
 	},
 	methods: {
+		formatBytes,
+		parseUnixTimestamp,
+		getStatusBadge,
+		parseTargetMtype,
 		...mapActions(['getResolved']),
 		unresolve(fileid) {
 			const lastFileOnPage = this.resolved.data.length === 1

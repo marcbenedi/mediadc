@@ -23,7 +23,6 @@ from .db_requests import (
     append_task_error,
     clear_task_files_scanned_groups,
     finalize_task,
-    increase_processed_files_count,
     lock_task,
     set_task_keepalive,
     unlock_task,
@@ -208,8 +207,6 @@ def process_directory_images(directory: FsNodeInfo, task_settings: dict) -> list
     sub_dirs = fs_extract_sub_dirs(fs_objs)
     fs_filter_by(fs_objs, "mimepart", [mimetype.IMAGE])
     process_images(task_settings, fs_objs)
-    if fs_objs:
-        increase_processed_files_count(task_settings["id"], len(fs_objs))
     return sub_dirs
 
 
@@ -238,6 +235,4 @@ def process_directory_videos(directory: FsNodeInfo, task_settings: dict) -> list
     sub_dirs = fs_extract_sub_dirs(fs_objs)
     fs_filter_by(fs_objs, "mimepart", [mimetype.VIDEO])
     process_videos(task_settings, fs_objs)
-    if fs_objs:
-        increase_processed_files_count(task_settings["id"], len(fs_objs))
     return sub_dirs

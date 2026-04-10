@@ -37,6 +37,8 @@ SetOfGroups: list[Any] = []  # [flat_numpy_array1,flat_numpy_array2,flat_numpy_a
 
 
 def process_images(settings: dict, fs_objs: list[FsNodeInfo]):
+    from .db_requests import increase_processed_files_count
+
     mdc_images_info = load_images_caches(fs_objs)
     for mdc_image_info in mdc_images_info:
         if mdc_image_info["skipped"] is not None:
@@ -61,6 +63,7 @@ def process_images(settings: dict, fs_objs: list[FsNodeInfo]):
                 mdc_image_info["hash"] = arr_hash_from_bytes(mdc_image_info["hash"])
         if mdc_image_info["hash"] is not None:
             process_image_record(settings["precision_img"], mdc_image_info)
+        increase_processed_files_count(settings["id"], 1)
 
 
 def process_hash(algo: str, hash_size: int, mdc_img_info: MdcImageInfo, exif_transpose: bool):

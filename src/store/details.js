@@ -25,7 +25,7 @@
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 
-import Formats from '../mixins/Formats.js'
+import { getStatusBadge } from '../composables/useFormats.js'
 
 const state = {
 	task: {},
@@ -337,7 +337,7 @@ const actions = {
 				context.commit('setTask', res.data.collectorTask)
 				context.commit('setDetails', res.data.collectorTaskDetails)
 
-				if (Formats.methods.getStatusBadge(context.state.task) === 'finished'
+				if (getStatusBadge(context.state.task) === 'finished'
 					&& context.state.detailsInfo.filestotal === 0 && context.state.detailsInfo.filessize === 0) {
 					context.dispatch('getDetailFilesTotalSize', taskId)
 				}

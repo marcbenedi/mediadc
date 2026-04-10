@@ -82,6 +82,7 @@ class CollectorService {
 		private readonly IJobList $jobList,
 		private readonly IPreview $previewManager,
 		private readonly PythonUtilsService $cpaUtils,
+		private readonly AppDataService $appDataService,
 		private readonly IL10N $l10n,
 		IConfig $config,
 	) {
@@ -108,7 +109,8 @@ class CollectorService {
 			$createdTask = $this->createCollectorTask($params);
 			if ($createdTask !== null) {
 				if (json_decode($pythonBinary->getValue())) {
-					$scriptName = 'binaries/' . Application::APP_ID
+					$binariesFolder = $this->appDataService->getAppDataFolder('binaries');
+					$scriptName = $binariesFolder['path'] . '/' . Application::APP_ID
 						. '_' . $this->cpaUtils->getBinaryName() . '/main';
 				} else {
 					$scriptName = 'main.py';

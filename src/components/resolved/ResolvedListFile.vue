@@ -86,7 +86,7 @@ import { getCurrentUser } from '@nextcloud/auth'
 import { generateUrl } from '@nextcloud/router'
 import { mapGetters } from 'vuex'
 
-import Formats from '../../mixins/Formats.js'
+import { formatBytes, parseUnixTimestamp, getStatusBadge, parseTargetMtype } from '../../composables/useFormats.js'
 
 import { NcButton } from '@nextcloud/vue'
 
@@ -95,7 +95,6 @@ export default {
 	components: {
 		NcButton,
 	},
-	mixins: [Formats],
 	props: {
 		file: {
 			type: Object,
@@ -123,6 +122,10 @@ export default {
 		},
 	},
 	methods: {
+		formatBytes,
+		parseUnixTimestamp,
+		getStatusBadge,
+		parseTargetMtype,
 		unresolve(fileid) {
 			this.updating = true
 			const lastFileOnPage = this.resolved.data.length === 1

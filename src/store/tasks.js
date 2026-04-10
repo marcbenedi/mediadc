@@ -27,7 +27,7 @@ import { generateUrl } from '@nextcloud/router'
 import { showError, showSuccess, showWarning } from '@nextcloud/dialogs'
 
 import { translate as t, translatePlural as n } from '@nextcloud/l10n'
-import Formats from '../mixins/Formats.js'
+import { getStatusBadge } from '../composables/useFormats.js'
 
 const state = {
 	tasks: [],
@@ -115,7 +115,21 @@ const actions = {
 	 * @return {Promise}
 	 */
 	async runTask(context, data) {
-		return axios.post(generateUrl('/apps/mediadc/api/v1/tasks/run'), data)
+		return axios.post(generateUrl('/apps/mediadc/api/v1/tasks/run'), data).then(res => {
+			if (res.data.success) {
+				showSuccess(t('mediadc', 'Task started'))
+			} else if (res.data.php_exec_not_enabled) {
+				showError(t('mediadc', 'PHP exec() function is not enabled. Cannot run tasks.'))
+			} else if (res.data.limit) {
+				showWarning(t('mediadc', 'Task limit reached. Please wait for a running task to finish.'))
+			} else if (res.data.empty) {
+				showWarning(t('mediadc', 'No matching files found in the selected directories.'))
+			}
+			return res
+		}).catch(err => {
+			console.debug(err)
+			showError(t('mediadc', 'An error occurred while starting the task'))
+		})
 	},
 
 	/**
@@ -208,7 +222,7 @@ const actions = {
 		}).then(res => {
 			if (res.data.success) {
 				commit('updateTask', res.data.restartedTask)
-				if (Formats.methods.getStatusBadge(task) !== 'duplicated') {
+				if (getStatusBadge(task) !== 'duplicated') {
 					showSuccess(t('mediadc', 'Task successfully restarted with previous settings!'))
 				} else {
 					showSuccess(t('mediadc', 'Task successfully started with duplicated settings!'))

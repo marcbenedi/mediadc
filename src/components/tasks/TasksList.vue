@@ -51,7 +51,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { NcEmptyContent } from '@nextcloud/vue'
 import ClipboardListOutline from 'vue-material-design-icons/ClipboardListOutline.vue'
 
-import Formats from '../../mixins/Formats.js'
+import { formatBytes, parseUnixTimestamp, getStatusBadge, parseTargetMtype } from '../../composables/useFormats.js'
 import TasksListItem from './TasksListItem.vue'
 
 export default {
@@ -61,7 +61,6 @@ export default {
 		NcEmptyContent,
 		ClipboardListOutline,
 	},
-	mixins: [Formats],
 	data() {
 		return {
 			tasksUpdater: null,
@@ -79,6 +78,10 @@ export default {
 		clearInterval(this.tasksUpdater)
 	},
 	methods: {
+		formatBytes,
+		parseUnixTimestamp,
+		getStatusBadge,
+		parseTargetMtype,
 		...mapActions([
 			'getTasks',
 		]),

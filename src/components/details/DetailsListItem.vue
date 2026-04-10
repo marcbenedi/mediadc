@@ -29,7 +29,7 @@
 		<div class="details-list-item-title">
 			<NcCheckboxRadioSwitch v-tooltip="{content: t('mediadc', 'Select group'), placement: 'top'}"
 				class="mediadc-checkbox-only batch-checkbox"
-				v-model:checked="checked" />
+				v-model="checked" />
 			<NcButton type="tertiary"
 				class="open-details-btn"
 				:aria-label="t('mediadc', 'Open duplicate group')"
@@ -112,7 +112,7 @@ import {
 
 import { mapGetters } from 'vuex'
 
-import Formats from '../../mixins/Formats.js'
+import { formatBytes, parseUnixTimestamp, getStatusBadge, parseTargetMtype } from '../../composables/useFormats.js'
 import DetailsGroupList from './DetailsGroupList.vue'
 
 export default {
@@ -124,7 +124,6 @@ export default {
 		NcCheckboxRadioSwitch,
 		DetailsGroupList,
 	},
-	mixins: [Formats],
 	props: {
 		detail: {
 			type: Object,
@@ -224,6 +223,10 @@ export default {
 		unsubscribe('toggleGroup', this.toggleGroup)
 	},
 	methods: {
+		formatBytes,
+		parseUnixTimestamp,
+		getStatusBadge,
+		parseTargetMtype,
 		openDetailFiles(detail) {
 			if (!this.opened) {
 				if (this.files === undefined || this.files.length === 0) {
