@@ -216,6 +216,7 @@ export default {
 			collapsedStatus: false,
 			editingTask: false,
 			exporting: false,
+			pendingSince: null,
 		}
 	},
 	computed: {
@@ -280,8 +281,20 @@ export default {
 		},
 		_getTaskDetails() {
 			this.getTaskDetails(this.$route.params.taskId).then(res => {
-				if (this.getStatusBadge(res.data.collectorTask) === 'finished' || this.getStatusBadge(res.data.collectorTask) === 'terminated' || this.getStatusBadge(res.data.collectorTask) === 'error') {
+				const status = this.getStatusBadge(res.data.collectorTask)
+				if (status === 'finished' || status === 'terminated' || status === 'error') {
 					clearInterval(this.tasksUpdater)
+					this.pendingSince = null
+				} else if (status === 'pending') {
+					if (this.pendingSince === null) {
+						this.pendingSince = Date.now()
+					} else if (Date.now() - this.pendingSince > 30000) {
+						showWarning(this.t('mediadc', 'Task has been pending for a while. It may have failed to start. Check the server logs for errors.'))
+						clearInterval(this.tasksUpdater)
+						this.pendingSince = null
+					}
+				} else {
+					this.pendingSince = null
 				}
 			})
 		},

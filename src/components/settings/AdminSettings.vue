@@ -63,6 +63,14 @@
 					</span>
 					ffmpeg: {{ systemInfo.ffmpeg_available ? t('mediadc', 'available') : t('mediadc', 'not found') }}
 				</li>
+				<template v-if="(!systemInfo.binary_found || !python_binary) && systemInfo.python_packages">
+					<li v-for="(installed, pkg) in systemInfo.python_packages" :key="pkg">
+						<span :class="installed ? 'status-ok' : 'status-error'">
+							{{ installed ? '✓' : '✗' }}
+						</span>
+						{{ pkg }}: {{ installed ? t('mediadc', 'installed') : t('mediadc', 'missing') }}
+					</li>
+				</template>
 			</ul>
 		</NcSettingsSection>
 		<NcLoadingIcon v-if="loadingSettings" :size="48" />

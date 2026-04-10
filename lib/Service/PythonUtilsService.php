@@ -264,16 +264,26 @@ class PythonUtilsService {
 			$info['binary_found'] = $binaryPath !== null;
 		}
 
-		// Check for Python
+		// Check for Python and dependencies
 		if ($this->isFunctionEnabled('exec')) {
 			exec('python3 --version 2>&1', $pyOutput, $pyResult);
 			$info['python_version'] = $pyResult === 0 ? trim(implode('', $pyOutput)) : 'not found';
 
 			exec('ffmpeg -version 2>&1', $ffmpegOutput, $ffmpegResult);
 			$info['ffmpeg_available'] = $ffmpegResult === 0;
+
+			// Check Python packages (only relevant when not using pre-compiled binary)
+			$packages = ['numpy', 'scipy', 'PIL', 'pillow_heif', 'hexhamming', 'nc_py_api', 'pywt'];
+			$info['python_packages'] = [];
+			foreach ($packages as $pkg) {
+				exec('python3 -c "import ' . $pkg . '" 2>&1', $pkgOutput, $pkgResult);
+				$info['python_packages'][$pkg] = $pkgResult === 0;
+				$pkgOutput = [];
+			}
 		} else {
 			$info['python_version'] = 'exec() disabled';
 			$info['ffmpeg_available'] = false;
+			$info['python_packages'] = [];
 		}
 
 		return $info;
