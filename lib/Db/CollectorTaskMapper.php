@@ -103,7 +103,7 @@ class CollectorTaskMapper extends QBMapper {
 		$qb->select('*')
 			->from($this->tableName)
 			->where(
-				$qb->expr()->eq('owner', $qb->createNamedParameter($owner, IQueryBuilder::PARAM_INT)),
+				$qb->expr()->eq('owner', $qb->createNamedParameter($owner, IQueryBuilder::PARAM_STR)),
 				$qb->expr()->gt('py_pid', $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT))
 			)
 			->setMaxResults($limit)

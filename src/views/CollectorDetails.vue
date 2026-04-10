@@ -174,7 +174,7 @@
 import axios from '@nextcloud/axios'
 import { getCurrentUser } from '@nextcloud/auth'
 import { subscribe, unsubscribe } from '@nextcloud/event-bus'
-import { showSuccess, showError, showWarning, showMessage } from '@nextcloud/dialogs'
+import { DialogSeverity, getDialogBuilder, showSuccess, showError, showWarning, showMessage } from '@nextcloud/dialogs'
 import { generateUrl } from '@nextcloud/router'
 import { mapActions, mapGetters } from 'vuex'
 
@@ -183,10 +183,7 @@ import Formats from '../mixins/Formats.js'
 import TasksEdit from '../components/tasks/TasksEdit.vue'
 import DetailsExport from '../components/details/DetailsExport.vue'
 
-import NcActions from '@nextcloud/vue/dist/Components/NcActions.js'
-import NcActionButton from '@nextcloud/vue/dist/Components/NcActionButton.js'
-import NcProgressBar from '@nextcloud/vue/dist/Components/NcProgressBar.js'
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
+import { NcActions, NcActionButton, NcProgressBar, NcButton } from '@nextcloud/vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import FileExportOutline from 'vue-material-design-icons/FileExportOutline.vue'
 
@@ -328,20 +325,23 @@ export default {
 				showWarning(this.t('mediadc', 'You are not allowed to restart this task'))
 			}
 		},
-		deleteTask(task) {
+		async deleteTask(task) {
 			if (this.isValidUser) {
-				const self = this
-				OC.dialogs.confirm(this.t('mediadc', 'Are sure you want to delete this task?'),
-					this.t('mediadc', 'Confirm task deletion'),
-					function(success) {
-						if (success) {
-							self.$store.dispatch('deleteTask', task).then(() => {
-								self.$router.push({ name: 'collector' })
-								showSuccess(self.t('mediadc', 'Task successfully deleted'))
-							})
-						}
-					},
-				)
+				const confirmed = await new Promise(resolve => {
+					getDialogBuilder(this.t('mediadc', 'Confirm task deletion'))
+						.setText(this.t('mediadc', 'Are sure you want to delete this task?'))
+						.setSeverity(DialogSeverity.Warning)
+						.addButton({ label: this.t('mediadc', 'Cancel'), callback: () => resolve(false) })
+						.addButton({ label: this.t('mediadc', 'Delete'), type: 'error', callback: () => resolve(true) })
+						.build()
+						.show()
+				})
+				if (confirmed) {
+					this.$store.dispatch('deleteTask', task).then(() => {
+						this.$router.push({ name: 'collector' })
+						showSuccess(this.t('mediadc', 'Task successfully deleted'))
+					})
+				}
 			} else {
 				showWarning(this.t('mediadc', 'You are not allowed to delete this task'))
 			}

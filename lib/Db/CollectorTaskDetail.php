@@ -62,7 +62,7 @@ class CollectorTaskDetail extends Entity implements JsonSerializable {
 			$this->setGroupId($params['groupId']);
 		}
 		if (isset($params['fileid'])) {
-			$this->setFileid($params['filid']);
+			$this->setFileid($params['fileid']);
 		}
 	}
 

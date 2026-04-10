@@ -18,14 +18,13 @@ def get_tasks() -> list:
         f"FROM {MDC_TABLES.tasks}{_where};"
     )
     tasks_list = execute_fetchall(query)
-    if CONFIG["dbtype"] == "mysql":
-        for task in tasks_list:
-            if isinstance(task["exclude_list"], str):
-                task["exclude_list"] = loads(task["exclude_list"])
-            if isinstance(task["collector_settings"], str):
-                task["collector_settings"] = loads(task["collector_settings"])
-            if isinstance(task["target_directory_ids"], str):
-                task["target_directory_ids"] = loads(task["target_directory_ids"])
+    for task in tasks_list:
+        if isinstance(task["exclude_list"], str):
+            task["exclude_list"] = loads(task["exclude_list"])
+        if isinstance(task["collector_settings"], str):
+            task["collector_settings"] = loads(task["collector_settings"])
+        if isinstance(task["target_directory_ids"], str):
+            task["target_directory_ids"] = loads(task["target_directory_ids"])
     return tasks_list
 
 
@@ -97,7 +96,7 @@ def get_images_caches(file_ids: list[int]) -> list:
         f"LEFT JOIN {MDC_TABLES.photos} AS imgcache "
         "ON fcache.fileid = imgcache.fileid AND fcache.mtime = imgcache.mtime "
         f"WHERE fcache.fileid IN({','.join(str(x) for x in file_ids)}) "
-        "ORDER BY fileid ASC;"
+        "ORDER BY fcache.fileid ASC;"
     )
     return execute_fetchall(query)
 
@@ -109,13 +108,12 @@ def get_videos_caches(file_ids: list[int]) -> list:
         f"LEFT JOIN {MDC_TABLES.videos} AS vcache "
         "ON fcache.fileid = vcache.fileid AND fcache.mtime = vcache.mtime "
         f"WHERE fcache.fileid IN({','.join(str(x) for x in file_ids)}) "
-        "ORDER BY fileid ASC;"
+        "ORDER BY fcache.fileid ASC;"
     )
     result = execute_fetchall(query)
-    if CONFIG["dbtype"] == "mysql":
-        for each_record in result:
-            if isinstance(each_record["timestamps"], str):
-                each_record["timestamps"] = loads(each_record["timestamps"])
+    for each_record in result:
+        if isinstance(each_record["timestamps"], str):
+            each_record["timestamps"] = loads(each_record["timestamps"])
     return result
 
 

@@ -23,8 +23,9 @@
  */
 
 import axios from '@nextcloud/axios'
-import { generateUrl } from '@nextcloud/router'
+import { showInfo } from '@nextcloud/dialogs'
 import { FileAction, registerFileAction, FileType } from '@nextcloud/files'
+import { generateUrl } from '@nextcloud/router'
 
 // eslint-disable-next-line
 function getSettings() {
@@ -67,43 +68,24 @@ function getStaticAppSvgInlineIcon() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-	if (OCA.Files && OCA.Files.fileActions) {
-		OCA.Files.fileActions.registerAction({
-			name: 'mediadcScan',
-			displayName: t('mediadc', 'Scan for duplicates'),
-			mime: 'dir',
-			permissions: OC.PERMISSION_READ,
-			order: 80,
-			iconClass: 'icon-mediadc',
-			actionHandler: (name, context) => {
-				createNewTaskFromFolder(context.fileInfoModel.attributes.id, context.fileInfoModel.attributes.path + context.fileInfoModel.attributes.name).then((res) => {
-					OC.dialogs.info(t('mediadc', 'New task for folder scan successfully created'), 'MediaDC')
-				})
-			},
-		})
-		return
-	} else {
-		// Try to register with new API
-		const action = new FileAction({
-			id: 'mediadc-scan',
-			displayName: () => t('mediadc', 'Scan for duplicates'),
-			iconSvgInline: () => getStaticAppSvgInlineIcon(),
-			order: 80,
-			enabled(nodes) {
-				if (nodes.length !== 1) {
-					return false
-				}
+	const action = new FileAction({
+		id: 'mediadc-scan',
+		displayName: () => t('mediadc', 'Scan for duplicates'),
+		iconSvgInline: () => getStaticAppSvgInlineIcon(),
+		order: 80,
+		enabled(nodes) {
+			if (nodes.length !== 1) {
+				return false
+			}
 
-				return (nodes[0].type === FileType.Folder)
-			},
-			async exec(node) {
-				createNewTaskFromFolder(node.fileid, node.dirname + node.basename).then((res) => {
-					OC.dialogs.info(t('mediadc', 'New task for folder scan successfully created'), 'MediaDC')
-				})
-				return null
-			},
-		})
-		registerFileAction(action)
-	}
-	console.error('Failed to register fileAction')
+			return (nodes[0].type === FileType.Folder)
+		},
+		async exec(node) {
+			createNewTaskFromFolder(node.fileid, node.dirname + node.basename).then(() => {
+				showInfo(t('mediadc', 'New task for folder scan successfully created'))
+			})
+			return null
+		},
+	})
+	registerFileAction(action)
 })

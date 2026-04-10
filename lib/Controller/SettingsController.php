@@ -28,7 +28,7 @@ declare(strict_types=1);
 
 namespace OCA\MediaDC\Controller;
 
-use OCA\Cloud_Py_API\Service\UtilsService;
+use OCA\MediaDC\Service\PythonUtilsService;
 use OCA\MediaDC\AppInfo\Application;
 use OCA\MediaDC\Service\PhotosService;
 use OCA\MediaDC\Service\SettingsService;
@@ -48,7 +48,7 @@ class SettingsController extends Controller {
 		private readonly SettingsService $service,
 		private readonly PhotosService $photosService,
 		private readonly VideosService $videosService,
-		private readonly UtilsService $cpaUtils,
+		private readonly PythonUtilsService $cpaUtils,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}

@@ -17,7 +17,6 @@ on:
 
 env:
   APP_NAME: mediadc
-  CPA_NAME: cloud_py_api
 
 jobs:
   xml-lint:
@@ -41,7 +40,7 @@ jobs:
     name: php-lint
     strategy:
       matrix:
-        php-versions: ["8.1", "8.2"]
+        php-versions: ["8.2", "8.3"]
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
@@ -60,7 +59,7 @@ jobs:
     name: php-cs
     strategy:
       matrix:
-        php-versions: ["8.1", "8.2"]
+        php-versions: ["8.2", "8.3"]
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
@@ -81,8 +80,8 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        php-versions: ["8.1", "8.2"]
-        server-versions: [ '30.0.0' ]
+        php-versions: ["8.2", "8.3"]
+        server-versions: [ '33.0.0' ]
     name: php-psalm-analysis
 
     steps:
@@ -106,13 +105,6 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           path: apps/${{ env.APP_NAME }}
-
-      - name: Checkout ${{ env.CPA_NAME }} app
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-        if: ${{ steps.server-checkout.outcome != 'success' }}
-        with:
-          repository: cloud-py-api/${{ env.CPA_NAME }}
-          path: apps/${{ env.CPA_NAME }}
 
       - name: Set up php ${{ matrix.php-versions }}
         uses: shivammathur/setup-php@v2

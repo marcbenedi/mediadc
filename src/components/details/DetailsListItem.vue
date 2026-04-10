@@ -101,7 +101,7 @@
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
-import { showError, showSuccess, showWarning } from '@nextcloud/dialogs'
+import { DialogSeverity, getDialogBuilder, showError, showSuccess, showWarning } from '@nextcloud/dialogs'
 import { subscribe, unsubscribe, emit } from '@nextcloud/event-bus'
 import {
 	NcCheckboxRadioSwitch,
@@ -280,15 +280,20 @@ export default {
 			}
 			return paginatedFiles
 		},
-		removeTaskDetail(detail) {
+		async removeTaskDetail(detail) {
 			if (this.deleteFileConfirmation) {
-				const self = this
-				OC.dialogs.confirm(this.t('mediadc', 'Are you sure you want to remove this group without deleting files?'),
-					this.t('mediadc', 'Confirm group removal'), function(success) {
-						if (success) {
-							self._removeTaskDetail(detail)
-						}
-					})
+				const confirmed = await new Promise(resolve => {
+					getDialogBuilder(this.t('mediadc', 'Confirm group removal'))
+						.setText(this.t('mediadc', 'Are you sure you want to remove this group without deleting files?'))
+						.setSeverity(DialogSeverity.Warning)
+						.addButton({ label: this.t('mediadc', 'Cancel'), callback: () => resolve(false) })
+						.addButton({ label: this.t('mediadc', 'Remove'), type: 'error', callback: () => resolve(true) })
+						.build()
+						.show()
+				})
+				if (confirmed) {
+					this._removeTaskDetail(detail)
+				}
 			} else {
 				this._removeTaskDetail(detail)
 			}

@@ -98,7 +98,7 @@
 import axios from '@nextcloud/axios'
 import { getCurrentUser } from '@nextcloud/auth'
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus'
-import { showError, showMessage, showWarning } from '@nextcloud/dialogs'
+import { DialogSeverity, getDialogBuilder, showError, showMessage, showWarning } from '@nextcloud/dialogs'
 import { generateRemoteUrl, generateUrl } from '@nextcloud/router'
 
 import { NcButton, NcCheckboxRadioSwitch } from '@nextcloud/vue'
@@ -208,15 +208,20 @@ export default {
 		onLoad() {
 			this.loaded = true
 		},
-		deleteGroupFile(file) {
+		async deleteGroupFile(file) {
 			if (this.deleteFileConfirmation) {
-				const self = this
-				OC.dialogs.confirm(this.t('mediadc', 'Are you sure you want to delete this file?'),
-					this.t('mediadc', 'Confirm file deletion'), function(success) {
-						if (success) {
-							self._deleteGroupFile(file)
-						}
-					})
+				const confirmed = await new Promise(resolve => {
+					getDialogBuilder(this.t('mediadc', 'Confirm file deletion'))
+						.setText(this.t('mediadc', 'Are you sure you want to delete this file?'))
+						.setSeverity(DialogSeverity.Warning)
+						.addButton({ label: this.t('mediadc', 'Cancel'), callback: () => resolve(false) })
+						.addButton({ label: this.t('mediadc', 'Delete'), type: 'error', callback: () => resolve(true) })
+						.build()
+						.show()
+				})
+				if (confirmed) {
+					this._deleteGroupFile(file)
+				}
 			} else {
 				this._deleteGroupFile(file)
 			}

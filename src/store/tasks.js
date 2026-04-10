@@ -126,8 +126,8 @@ const actions = {
 	 * @param {number} taskId task id
 	 * @return {Promise<object>}
 	 */
-	async terminateTask({ commit }, taskId) {
-		return axios.post(generateUrl(`/apps/mediadc/api/v1/tasks/${taskId}/terminate`)).then(res => {
+	async terminateTask({ commit }, task) {
+		return axios.post(generateUrl(`/apps/mediadc/api/v1/tasks/${task.id}/terminate`)).then(res => {
 			if (res.data.success) {
 				commit('updateTask', res.data.terminatedTask)
 				showSuccess(t('mediadc', 'Task terminated'))

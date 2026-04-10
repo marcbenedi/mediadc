@@ -59,8 +59,8 @@ import {
 	NcDashboardWidgetItem,
 	NcButton,
 	NcEmptyContent,
-	ClipboardListOutline,
 } from '@nextcloud/vue'
+import ClipboardListOutline from 'vue-material-design-icons/ClipboardListOutline.vue'
 
 import Formats from '../mixins/Formats.js'
 

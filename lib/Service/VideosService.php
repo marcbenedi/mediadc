@@ -36,8 +36,8 @@ use OCP\Files\IRootFolder;
 use OCP\IPreview;
 
 class VideosService {
-	private string $userId;
-	private Folder $userFolder;
+	private ?string $userId = null;
+	private ?Folder $userFolder = null;
 
 	public function __construct(
 		?string $userId,

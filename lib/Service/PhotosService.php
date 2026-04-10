@@ -37,8 +37,8 @@ use OCP\Files\IRootFolder;
 use OCP\IPreview;
 
 class PhotosService {
-	private string $userId;
-	private Folder $userFolder;
+	private ?string $userId = null;
+	private ?Folder $userFolder = null;
 
 	public function __construct(
 		?string $userId,

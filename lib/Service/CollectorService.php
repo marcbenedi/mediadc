@@ -29,8 +29,8 @@ declare(strict_types=1);
 namespace OCA\MediaDC\Service;
 
 use DOMDocument;
-use OCA\Cloud_Py_API\Service\PythonService;
-use OCA\Cloud_Py_API\Service\UtilsService as CPAUtilsService;
+use OCA\MediaDC\Service\PythonService;
+use OCA\MediaDC\Service\PythonUtilsService;
 use OCA\Files_Sharing\SharedStorage;
 use OCA\MediaDC\AppInfo\Application;
 use OCA\MediaDC\BackgroundJob\QueuedTaskJob;
@@ -81,7 +81,7 @@ class CollectorService {
 		private readonly VideosService $videosService,
 		private readonly IJobList $jobList,
 		private readonly IPreview $previewManager,
-		private readonly CPAUtilsService $cpaUtils,
+		private readonly PythonUtilsService $cpaUtils,
 		private readonly IL10N $l10n,
 		IConfig $config,
 	) {
@@ -114,29 +114,17 @@ class CollectorService {
 					$scriptName = 'main.py';
 				}
 				if ($this->cpaUtils->isFunctionEnabled('exec')) {
-					if ($this->isObjectStore) {
-						$result = $this->cpaUtils->prefetchAppDataFile(
-							Application::APP_ID,
-							'binaries',
-							Application::APP_ID . '_' . $this->cpaUtils->getBinaryName() . '.tar.gz'
-						);
-						if (!$result) {
-							$this->logger->error('[' . self::class . '] Task run error: Can\'t prefetch Python binary');
-							return ['success' => false, 'prefetch_error' => true];
-						}
-						// Prepend the cwd that is temp folder
-						$scriptName = $result['path'] . $scriptName;
-					}
 					$this->pythonService->run(Application::APP_ID, $scriptName, [
 						'-t' => $createdTask->getId()
 					], true, [
+						...$this->cpaUtils->getNcPyApiEnv(),
 						'PHP_PATH' => $this->cpaUtils->getPhpInterpreter(),
 						'SERVER_ROOT' => !$this->cpaUtils->isSnapEnv() ? \OC::$SERVERROOT : '',
 						'IS_SNAP_ENV' => $this->cpaUtils->isSnapEnv(),
 						'USER_ID' => $this->userId,
 						'LOGLEVEL' => $this->cpaUtils->getNCLogLevel(),
 						'CPA_LOGLEVEL' => $this->cpaUtils->getCpaLogLevel()
-					], true);
+					], json_decode($pythonBinary->getValue()));
 				} else {
 					$this->logger->error('[' . self::class . '] Task run error: PHP `exec` function is not available');
 					return ['success' => false, 'php_exec_not_enabled' => true];
@@ -228,21 +216,9 @@ class CollectorService {
 				$collectorTask = $this->tasksMapper->update($collectorTask);
 				$this->deleteTaskDetails($taskId);
 				if ($this->cpaUtils->isFunctionEnabled('exec')) {
-					if ($this->isObjectStore) {
-						$result = $this->cpaUtils->prefetchAppDataFile(
-							Application::APP_ID,
-							'binaries',
-							Application::APP_ID . '_' . $this->cpaUtils->getBinaryName() . '.tar.gz'
-						);
-						if (!$result) {
-							$this->logger->error('[' . self::class . '] Task run error: Can\'t prefetch Python binary');
-							return ['success' => false, 'prefetch_error' => true];
-						}
-						// Prepend the cwd that is temp folder
-						$scriptName = $result['path'] . $scriptName;
-					}
 					$this->pythonService->run(Application::APP_ID,
 						$scriptName, ['-t' => $taskId], true, [
+							...$this->cpaUtils->getNcPyApiEnv(),
 							'PHP_PATH' => $this->cpaUtils->getPhpInterpreter(),
 							'SERVER_ROOT' => !$this->cpaUtils->isSnapEnv() ? \OC::$SERVERROOT : '',
 							'IS_SNAP_ENV' => $this->cpaUtils->isSnapEnv(),
@@ -267,6 +243,7 @@ class CollectorService {
 			if ($this->cpaUtils->isFunctionEnabled('exec')) {
 				$this->pythonService->run(Application::APP_ID,
 					$scriptName, ['-t' => $taskId], true, [
+						...$this->cpaUtils->getNcPyApiEnv(),
 						'PHP_PATH' => $this->cpaUtils->getPhpInterpreter(),
 						'SERVER_ROOT' => !$this->cpaUtils->isSnapEnv() ? \OC::$SERVERROOT : '',
 						'IS_SNAP_ENV' => $this->cpaUtils->isSnapEnv(),

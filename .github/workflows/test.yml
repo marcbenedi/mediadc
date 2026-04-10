@@ -20,7 +20,6 @@ env:
   PHPUNIT_CONFIG: ./tests/phpunit.unit.xml
   PHPUNIT_INTEGRATION_CONFIG: ./tests/phpunit.integration.xml
   APP_NAME: mediadc
-  CPA_NAME: cloud_py_api
 
 jobs:
   phpunit-mysql:
@@ -28,8 +27,8 @@ jobs:
 
     strategy:
       matrix:
-        php-versions: ["7.4", "8.0"]
-        nextcloud: ['25.0.3']
+        php-versions: ["8.2", "8.3"]
+        nextcloud: ['33.0.2']
 
     services:
       mysql:
@@ -68,12 +67,6 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Checkout ${{ env.CPA_NAME }} app
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-        with:
-          repository: cloud-py-api/${{ env.CPA_NAME }}
-          path: apps/${{ env.CPA_NAME }}
-
       - name: Set up PHPUnit
         working-directory: apps/${{ env.APP_NAME }}
         run: composer i
@@ -86,7 +79,6 @@ jobs:
           php occ maintenance:install --verbose --database=mysql --database-name=nextcloud \
           --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root \
           --database-pass=rootpassword --admin-user admin --admin-pass password
-          php occ app:enable ${{ env.CPA_NAME }}
           php occ app:enable ${{ env.APP_NAME }}
 
       - name: Check PHPUnit config file existence
@@ -173,8 +165,8 @@ jobs:
 
     strategy:
       matrix:
-        php-versions: ["8.0"]
-        nextcloud: ['25.0.3']
+        php-versions: ["8.2"]
+        nextcloud: ['33.0.2']
 
     services:
       postgres:
@@ -215,12 +207,6 @@ jobs:
         with:
           path: apps/${{ env.APP_NAME }}
 
-      - name: Checkout ${{ env.CPA_NAME }} app
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-        with:
-          repository: cloud-py-api/${{ env.CPA_NAME }}
-          path: apps/${{ env.CPA_NAME }}
-
       - name: Set up PHPUnit
         working-directory: apps/${{ env.APP_NAME }}
         run: composer i
@@ -233,7 +219,6 @@ jobs:
           php occ maintenance:install --verbose --database=pgsql --database-name=nextcloud \
           --database-host=127.0.0.1 --database-port=$DB_PORT --database-user=root \
           --database-pass=rootpassword --admin-user admin --admin-pass password
-          php occ app:enable ${{ env.CPA_NAME }}
           php occ app:enable ${{ env.APP_NAME }}
 
       - name: Check PHPUnit config file existence
