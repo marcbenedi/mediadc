@@ -16,9 +16,15 @@ jobs:
         include:
           - platform: manylinux_x86_64
             docker_image: python:3.11-slim
+            install_deps: "apt-get update -qq && apt-get install -y -qq build-essential binutils > /dev/null 2>&1"
+            qemu: false
+          - platform: musllinux_x86_64
+            docker_image: python:3.11-alpine
+            install_deps: "apk add --no-cache build-base binutils > /dev/null 2>&1"
             qemu: false
           - platform: manylinux_aarch64
             docker_image: python:3.11-slim
+            install_deps: "apt-get update -qq && apt-get install -y -qq build-essential binutils > /dev/null 2>&1"
             qemu: true
 
     steps:
@@ -41,8 +47,8 @@ jobs:
             -v ${{ github.workspace }}:/app \
             -w /app \
             ${{ matrix.docker_image }} \
-            bash -c "
-              apt-get update -qq && apt-get install -y -qq build-essential binutils > /dev/null 2>&1
+            sh -c "
+              ${{ matrix.install_deps }}
               pip install -q -r requirements.txt pyinstaller
               pyinstaller --onefile --name main \
                 --hidden-import python.db_requests \
