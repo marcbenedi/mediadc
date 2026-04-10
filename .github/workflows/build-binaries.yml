@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-binary:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -82,3 +82,53 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/app python:3.11-slim \
             rm -rf /app/dist /app/build /app/main.spec
+
+  package-app:
+    runs-on: ubuntu-latest
+    needs: build-binary
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Download all binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: binaries
+
+      - name: Package app
+        run: |
+          # Create app directory with only the files needed for deployment
+          mkdir -p mediadc/binaries
+
+          # Copy app files (respecting .nextcloudignore)
+          cp -r appinfo css img js l10n lib python templates main.py requirements.txt mediadc/
+          cp COPYING LICENSE CHANGELOG.md mediadc/ 2>/dev/null || true
+
+          # Extract and include binaries
+          for tarball in binaries/*/mediadc_*.tar.gz; do
+            tar xzf "$tarball" -C mediadc/binaries/
+          done
+
+          # Create the app tarball
+          tar czf mediadc.tar.gz mediadc
+
+      - name: Upload app package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mediadc-app
+          path: mediadc.tar.gz
+
+      - name: Attach to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: mediadc.tar.gz
