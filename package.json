@@ -1,7 +1,7 @@
 {
 	"name": "mediadc",
 	"description": "Nextcloud Media Duplicate Collector application",
-	"version": "0.6.1",
+	"version": "0.6.2",
 	"keywords": [
 		"nextcloud",
 		"photos",
