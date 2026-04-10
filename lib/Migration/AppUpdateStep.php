@@ -28,10 +28,13 @@ declare(strict_types=1);
 
 namespace OCA\MediaDC\Migration;
 
+use OCA\MediaDC\AppInfo\Application;
 use OCA\MediaDC\Db\SettingMapper;
 use OCA\MediaDC\Migration\data\AppInitialData;
 use OCA\MediaDC\Service\AppDataService;
+use OCA\MediaDC\Service\PythonUtilsService;
 use OCA\MediaDC\Service\UtilsService;
+use OCP\App\IAppManager;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
@@ -40,30 +43,63 @@ class AppUpdateStep implements IRepairStep {
 		private readonly UtilsService $utils,
 		private readonly AppDataService $appDataService,
 		private readonly SettingMapper $settingMapper,
+		private readonly PythonUtilsService $pythonUtils,
+		private readonly IAppManager $appManager,
 	) {
 	}
 
 	public function getName(): string {
-		return 'Update settings along with MediaDC';
+		return 'Update settings and binaries along with MediaDC';
 	}
 
 	public function run(IOutput $output) {
-		$output->startProgress(2);
+		$output->startProgress(3);
+
 		$output->advance(1, 'Sync settings changes');
 		$this->utils->checkForSettingsUpdates(AppInitialData::$APP_INITIAL_DATA);
 
 		$output->advance(1, 'Creating app data folders');
+		$this->appDataService->createAppDataFolder('binaries');
 		$this->appDataService->createAppDataFolder('logs');
 
-		// Ensure python_binary is set to false (system Python is used directly)
+		$output->advance(1, 'Downloading pre-compiled Python binary');
+		$this->downloadBinary($output);
+
+		$output->finishProgress();
+	}
+
+	private function downloadBinary(IOutput $output): void {
+		$binaryName = Application::APP_ID . '_' . $this->pythonUtils->getBinaryName();
+		$version = $this->appManager->getAppVersion(Application::APP_ID, false);
+		$binariesFolder = $this->appDataService->getAppDataFolder('binaries');
+
+		if (!isset($binariesFolder['path'])) {
+			$output->warning('Could not resolve binaries folder path');
+			$this->setPythonBinary(false);
+			return;
+		}
+
+		$url = 'https://github.com/marcbenedi/mediadc/releases/download/v'
+			. $version . '/' . $binaryName . '.tar.gz';
+
+		$result = $this->pythonUtils->downloadPythonBinaryDir($url, $binariesFolder['path'], $binaryName);
+
+		if ($result['downloaded']) {
+			$this->setPythonBinary(true);
+		} else {
+			$output->warning('Could not download pre-compiled binary. '
+				. 'Falling back to system Python (requires python3, pip, and ffmpeg).');
+			$this->setPythonBinary(false);
+		}
+	}
+
+	private function setPythonBinary(bool $value): void {
 		try {
-			$pythonBinarySetting = $this->settingMapper->findByName('python_binary');
-			$pythonBinarySetting->setValue(json_encode(false));
-			$this->settingMapper->update($pythonBinarySetting);
+			$setting = $this->settingMapper->findByName('python_binary');
+			$setting->setValue(json_encode($value));
+			$this->settingMapper->update($setting);
 		} catch (\Exception $e) {
 			// Setting not found
 		}
-
-		$output->finishProgress();
 	}
 }

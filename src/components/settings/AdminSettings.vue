@@ -66,7 +66,7 @@
 			</NcSettingsSection>
 			<NcSettingsSection :name="t('mediadc',mappedSettings.ignore_orientation.display_name)"
 				:description="t('mediadc', mappedSettings.ignore_orientation.description)">
-				<NcCheckboxRadioSwitch :checked.sync="ignore_orientation" @update:checked="updateIgnoreOrientation">
+				<NcCheckboxRadioSwitch v-model:checked="ignore_orientation" @update:checked="updateIgnoreOrientation">
 					{{ t('mediadc', 'Ignore image orientation') }}
 				</NcCheckboxRadioSwitch>
 			</NcSettingsSection>
@@ -140,7 +140,7 @@
 			</NcSettingsSection>
 			<NcSettingsSection :name="t('mediadc', mappedSettings.python_binary.display_name)"
 				:description="t('mediadc', mappedSettings.python_binary.description)">
-				<NcCheckboxRadioSwitch :checked.sync="python_binary" @update:checked="updatePythonBinary">
+				<NcCheckboxRadioSwitch v-model:checked="python_binary" @update:checked="updatePythonBinary">
 					{{ t('mediadc', 'Use pre-compiled Python binaries') }}
 				</NcCheckboxRadioSwitch>
 			</NcSettingsSection>

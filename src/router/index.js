@@ -23,18 +23,14 @@
  */
 
 import { generateUrl } from '@nextcloud/router'
-import VueRouter from 'vue-router'
-import Vue from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const Collector = () => import('../views/Collector.vue')
 const CollectorDetails = () => import('../views/CollectorDetails.vue')
 const Resolved = () => import('../views/Resolved.vue')
 
-Vue.use(VueRouter)
-
-export default new VueRouter({
-	mode: 'history',
-	base: generateUrl('/apps/mediadc', ''),
+export default createRouter({
+	history: createWebHistory(generateUrl('/apps/mediadc', '')),
 	linkActiveClass: 'active',
 	routes: [
 		{

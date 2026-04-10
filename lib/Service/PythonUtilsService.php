@@ -26,6 +26,7 @@ namespace OCA\MediaDC\Service;
 use OCA\MediaDC\Db\SettingMapper;
 use OCP\App\IAppManager;
 use OCP\IConfig;
+use Psr\Log\LoggerInterface;
 
 /**
  * Utility service replacing cloud_py_api's UtilsService.
@@ -36,6 +37,7 @@ class PythonUtilsService {
 		private readonly IConfig $config,
 		private readonly SettingMapper $settingMapper,
 		private readonly IAppManager $appManager,
+		private readonly LoggerInterface $logger,
 	) {
 	}
 
@@ -162,6 +164,65 @@ class PythonUtilsService {
 		} catch (\Exception $e) {
 			return 'WARNING';
 		}
+	}
+
+	/**
+	 * Download a pre-compiled Python binary tarball from a URL and extract it.
+	 *
+	 * @return array{downloaded: bool, error?: string}
+	 */
+	public function downloadPythonBinaryDir(
+		string $url,
+		string $targetDir,
+		string $binaryName,
+	): array {
+		$binaryPath = $targetDir . '/' . $binaryName;
+
+		if (is_dir($binaryPath) && is_executable($binaryPath . '/main')) {
+			return ['downloaded' => true];
+		}
+
+		$tmpFile = tempnam(sys_get_temp_dir(), 'mediadc_') . '.tar.gz';
+
+		$ch = curl_init($url);
+		if ($ch === false) {
+			return ['downloaded' => false, 'error' => 'curl_init failed'];
+		}
+
+		$fp = fopen($tmpFile, 'w');
+		curl_setopt($ch, CURLOPT_FILE, $fp);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+		curl_exec($ch);
+		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$error = curl_error($ch);
+		curl_close($ch);
+		fclose($fp);
+
+		if ($httpCode !== 200) {
+			@unlink($tmpFile);
+			$this->logger->error('Binary download failed: HTTP ' . $httpCode . ' for ' . $url . ' - ' . $error);
+			return ['downloaded' => false, 'error' => 'HTTP ' . $httpCode];
+		}
+
+		// Extract
+		try {
+			$phar = new \PharData($tmpFile);
+			$phar->extractTo($targetDir, null, true);
+		} catch (\Exception $e) {
+			@unlink($tmpFile);
+			$this->logger->error('Binary extraction failed: ' . $e->getMessage());
+			return ['downloaded' => false, 'error' => $e->getMessage()];
+		}
+		@unlink($tmpFile);
+
+		// Make executable
+		if (file_exists($binaryPath . '/main')) {
+			chmod($binaryPath . '/main', 0755);
+		}
+
+		return ['downloaded' => true];
 	}
 
 	/**

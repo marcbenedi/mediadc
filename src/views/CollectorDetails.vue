@@ -24,8 +24,8 @@
 
 <template>
 	<div v-if="!loading" class="container">
-		<TasksEdit v-if="editingTask" :opened.sync="editingTask" />
-		<DetailsExport v-if="exporting" :opened.sync="exporting" :task="task" />
+		<TasksEdit v-if="editingTask" v-model:opened="editingTask" />
+		<DetailsExport v-if="exporting" v-model:opened="exporting" :task="task" />
 		<div class="task-details">
 			<div class="task-details-heading">
 				<h2>
@@ -174,7 +174,7 @@
 import axios from '@nextcloud/axios'
 import { getCurrentUser } from '@nextcloud/auth'
 import { subscribe, unsubscribe } from '@nextcloud/event-bus'
-import { DialogSeverity, getDialogBuilder, showSuccess, showError, showWarning, showMessage } from '@nextcloud/dialogs'
+import { getDialogBuilder, showSuccess, showError, showWarning, showMessage } from '@nextcloud/dialogs'
 import { generateUrl } from '@nextcloud/router'
 import { mapActions, mapGetters } from 'vuex'
 
@@ -239,19 +239,19 @@ export default {
 	beforeMount() {
 		this.$emit('update:loading', true)
 		this.tasksUpdater = setInterval(this._getTaskDetails, 3000)
-		this.getTaskDetails().then((res) => {
+		this.getTaskDetails(this.$route.params.taskId).then((res) => {
 			if (this.getStatusBadge(res.data.collectorTask) === 'finished' || this.getStatusBadge(res.data.collectorTask) === 'duplicated') {
 				clearInterval(this.tasksUpdater)
 			}
 			this.$emit('update:loading', false)
 		})
-		this.getTaskInfo()
+		this.getTaskInfo(this.$route.params.taskId)
 		subscribe('restartTask', this.onRestartTaskEvent)
-		subscribe('updateTaskInfo', this.getDetailFilesTotalSize)
+		subscribe('updateTaskInfo', this._getDetailFilesTotalSize)
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		clearInterval(this.tasksUpdater)
-		unsubscribe('updateTaskInfo', this.getDetailFilesTotalSize)
+		unsubscribe('updateTaskInfo', this._getDetailFilesTotalSize)
 		unsubscribe('restartTask', this.onRestartTaskEvent)
 		this.$store.commit('setTask', {})
 		this.$store.commit('setTaskInfo', { exclude_directories: [], target_directories: [] })
@@ -276,11 +276,14 @@ export default {
 			}
 		},
 		_getTaskDetails() {
-			this.getTaskDetails().then(res => {
+			this.getTaskDetails(this.$route.params.taskId).then(res => {
 				if (this.getStatusBadge(res.data.collectorTask) === 'finished' || this.getStatusBadge(res.data.collectorTask) === 'terminated' || this.getStatusBadge(res.data.collectorTask) === 'error') {
 					clearInterval(this.tasksUpdater)
 				}
 			})
+		},
+		_getDetailFilesTotalSize() {
+			this.getDetailFilesTotalSize(this.$route.params.taskId)
 		},
 		restartTask(task) {
 			if (this.isValidUser) {
@@ -303,7 +306,7 @@ export default {
 						},
 					}).then(res => {
 						if (res.data.success) {
-							this.getTaskDetails()
+							this.getTaskDetails(this.$route.params.taskId)
 							this.$store.commit('setDetailsInfo', { filestotal: 0, filessize: 0 })
 							this.tasksUpdater = setInterval(this._getTaskDetails, 3000)
 							showSuccess(this.t('mediadc', 'Task successfully restarted with previous settings!'))
@@ -330,7 +333,7 @@ export default {
 				const confirmed = await new Promise(resolve => {
 					getDialogBuilder(this.t('mediadc', 'Confirm task deletion'))
 						.setText(this.t('mediadc', 'Are sure you want to delete this task?'))
-						.setSeverity(DialogSeverity.Warning)
+						.setSeverity('warning')
 						.addButton({ label: this.t('mediadc', 'Cancel'), callback: () => resolve(false) })
 						.addButton({ label: this.t('mediadc', 'Delete'), type: 'error', callback: () => resolve(true) })
 						.build()
@@ -369,8 +372,8 @@ export default {
 			return '#'
 		},
 		onRestartTaskEvent() {
-			this.getTaskInfo()
-			this.getTaskDetails()
+			this.getTaskInfo(this.$route.params.taskId)
+			this.getTaskDetails(this.$route.params.taskId)
 			this.$store.commit('setDetailsInfo', { filestotal: 0, filessize: 0 })
 			clearInterval(this.tasksUpdater)
 			this.tasksUpdater = setInterval(this._getTaskDetails, 3000)

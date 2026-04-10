@@ -22,17 +22,14 @@
  *
  */
 
-import Vue from 'vue'
-import Vuex, { Store } from 'vuex'
+import { createStore } from 'vuex'
 
 import settings from './settings.js'
 import tasks from './tasks.js'
 import details from './details.js'
 import resolved from './resolved.js'
 
-Vue.use(Vuex)
-
-export default new Store({
+export default createStore({
 	modules: {
 		settings,
 		tasks,

@@ -28,11 +28,14 @@ declare(strict_types=1);
 
 namespace OCA\MediaDC\Migration;
 
+use OCA\MediaDC\AppInfo\Application;
 use OCA\MediaDC\Db\Setting;
 use OCA\MediaDC\Db\SettingMapper;
 use OCA\MediaDC\Migration\data\AppInitialData;
 use OCA\MediaDC\Service\AppDataService;
+use OCA\MediaDC\Service\PythonUtilsService;
 use OCA\MediaDC\Service\UtilsService;
+use OCP\App\IAppManager;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
@@ -41,6 +44,8 @@ class AppDataInitializationStep implements IRepairStep {
 		private readonly SettingMapper $settingMapper,
 		private readonly UtilsService $utils,
 		private readonly AppDataService $appDataService,
+		private readonly PythonUtilsService $pythonUtils,
+		private readonly IAppManager $appManager,
 	) {
 	}
 
@@ -49,7 +54,7 @@ class AppDataInitializationStep implements IRepairStep {
 	}
 
 	public function run(IOutput $output) {
-		$output->startProgress(3);
+		$output->startProgress(4);
 		$output->advance(1, 'Filling database with initial data');
 		$app_data = AppInitialData::$APP_INITIAL_DATA;
 
@@ -70,17 +75,47 @@ class AppDataInitializationStep implements IRepairStep {
 		$this->utils->checkForSettingsUpdates($app_data);
 
 		$output->advance(1, 'Creating app data folders');
+		$this->appDataService->createAppDataFolder('binaries');
 		$this->appDataService->createAppDataFolder('logs');
 
-		// Ensure python_binary is set to false (system Python is used directly)
-		try {
-			$pythonBinarySetting = $this->settingMapper->findByName('python_binary');
-			$pythonBinarySetting->setValue(json_encode(false));
-			$this->settingMapper->update($pythonBinarySetting);
-		} catch (\Exception $e) {
-			// Setting may not exist yet
-		}
+		$output->advance(1, 'Downloading pre-compiled Python binary');
+		$this->downloadBinary($output);
 
 		$output->finishProgress();
+	}
+
+	private function downloadBinary(IOutput $output): void {
+		$binaryName = Application::APP_ID . '_' . $this->pythonUtils->getBinaryName();
+		$version = $this->appManager->getAppVersion(Application::APP_ID, false);
+		$binariesFolder = $this->appDataService->getAppDataFolder('binaries');
+
+		if (!isset($binariesFolder['path'])) {
+			$output->warning('Could not resolve binaries folder path');
+			$this->setPythonBinary(false);
+			return;
+		}
+
+		$url = 'https://github.com/marcbenedi/mediadc/releases/download/v'
+			. $version . '/' . $binaryName . '.tar.gz';
+
+		$result = $this->pythonUtils->downloadPythonBinaryDir($url, $binariesFolder['path'], $binaryName);
+
+		if ($result['downloaded']) {
+			$this->setPythonBinary(true);
+		} else {
+			$output->warning('Could not download pre-compiled binary. '
+				. 'Falling back to system Python (requires python3, pip, and ffmpeg).');
+			$this->setPythonBinary(false);
+		}
+	}
+
+	private function setPythonBinary(bool $value): void {
+		try {
+			$setting = $this->settingMapper->findByName('python_binary');
+			$setting->setValue(json_encode($value));
+			$this->settingMapper->update($setting);
+		} catch (\Exception $e) {
+			// Setting may not exist yet during initial install
+		}
 	}
 }

@@ -29,7 +29,7 @@
 		<div class="details-list-item-title">
 			<NcCheckboxRadioSwitch v-tooltip="{content: t('mediadc', 'Select group'), placement: 'top'}"
 				class="mediadc-checkbox-only batch-checkbox"
-				:checked.sync="checked" />
+				v-model:checked="checked" />
 			<NcButton type="tertiary"
 				class="open-details-btn"
 				:aria-label="t('mediadc', 'Open duplicate group')"
@@ -92,16 +92,16 @@
 			:detail="detail"
 			:files="files"
 			:all-files="allFiles"
-			:loading-files.sync="loadingFiles"
-			:updating.sync="updating"
-			:files-ascending.sync="filesAscending" />
+			v-model:loading-files="loadingFiles"
+			v-model:updating="updating"
+			v-model:files-ascending="filesAscending" />
 	</div>
 </template>
 
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
-import { DialogSeverity, getDialogBuilder, showError, showSuccess, showWarning } from '@nextcloud/dialogs'
+import { getDialogBuilder, showError, showSuccess, showWarning } from '@nextcloud/dialogs'
 import { subscribe, unsubscribe, emit } from '@nextcloud/event-bus'
 import {
 	NcCheckboxRadioSwitch,
@@ -217,7 +217,7 @@ export default {
 		subscribe('openGroup', this.openGroup)
 		subscribe('toggleGroup', this.toggleGroup)
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		unsubscribe('updateGroupFilesPagination', this.updateFilesPagination)
 		unsubscribe('deselectGroups', this.deselect)
 		unsubscribe('openGroup', this.openGroup)
@@ -285,7 +285,7 @@ export default {
 				const confirmed = await new Promise(resolve => {
 					getDialogBuilder(this.t('mediadc', 'Confirm group removal'))
 						.setText(this.t('mediadc', 'Are you sure you want to remove this group without deleting files?'))
-						.setSeverity(DialogSeverity.Warning)
+						.setSeverity('warning')
 						.addButton({ label: this.t('mediadc', 'Cancel'), callback: () => resolve(false) })
 						.addButton({ label: this.t('mediadc', 'Remove'), type: 'error', callback: () => resolve(true) })
 						.build()

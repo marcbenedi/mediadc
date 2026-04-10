@@ -79,7 +79,7 @@
 				:file="file"
 				:files="files"
 				:all-files="allFiles"
-				:checked-files.sync="checkedFiles"
+				v-model:checked-files="checkedFiles"
 				:detail="detail" />
 		</div>
 		<div v-else-if="filteredFiles.length > 0" class="details-group-files">
@@ -88,7 +88,7 @@
 				:file="file"
 				:files="files"
 				:all-files="allFiles"
-				:checked-files.sync="checkedFiles"
+				v-model:checked-files="checkedFiles"
 				:detail="detail" />
 		</div>
 		<div v-else class="details-group-files">

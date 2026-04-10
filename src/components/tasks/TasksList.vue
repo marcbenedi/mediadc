@@ -75,7 +75,7 @@ export default {
 	beforeMount() {
 		this.tasksUpdater = setInterval(() => this.getTasks(true), 5000)
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		clearInterval(this.tasksUpdater)
 	},
 	methods: {

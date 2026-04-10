@@ -24,11 +24,10 @@
 
 import { generateFilePath } from '@nextcloud/router'
 import { getRequestToken } from '@nextcloud/auth'
-import { Tooltip } from '@nextcloud/vue'
-import { sync } from 'vuex-router-sync'
+import { VTooltip as Tooltip } from 'floating-vue' // eslint-disable-line n/no-extraneous-import
 import { translate, translatePlural } from '@nextcloud/l10n'
 import '@nextcloud/dialogs/style.css'
-import Vue from 'vue'
+import { createApp } from 'vue'
 
 import MediaDC from './MediaDC.vue'
 import router from './router/index.js'
@@ -40,18 +39,12 @@ __webpack_nonce__ = btoa(getRequestToken())
 // eslint-disable-next-line
 __webpack_public_path__ = generateFilePath('mediadc', '', 'js/')
 
-sync(store, router)
-
-Vue.directive('tooltip', Tooltip)
-
-Vue.prototype.t = translate
-Vue.prototype.n = translatePlural
-Vue.prototype.OC = window.OC
-Vue.prototype.OCA = window.OCA
-
-export default new Vue({
-	el: '#content',
-	router,
-	store,
-	render: h => h(MediaDC),
-})
+const app = createApp(MediaDC)
+app.use(store)
+app.use(router)
+app.directive('tooltip', Tooltip)
+app.config.globalProperties.t = translate
+app.config.globalProperties.n = translatePlural
+app.config.globalProperties.OC = window.OC
+app.config.globalProperties.OCA = window.OCA
+app.mount('#content')

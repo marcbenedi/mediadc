@@ -331,15 +331,15 @@ const actions = {
 	 * @param {object} context the store object
 	 * @return {Promise<object>} request data (collectorTask, collectorTaskDetails)
 	 */
-	async getTaskDetails(context) {
-		return axios.get(generateUrl(`/apps/mediadc/api/v1/tasks/${context.rootState.route.params.taskId}`)).then(res => {
+	async getTaskDetails(context, taskId) {
+		return axios.get(generateUrl(`/apps/mediadc/api/v1/tasks/${taskId}`)).then(res => {
 			if ('success' in res.data && res.data.success) {
 				context.commit('setTask', res.data.collectorTask)
 				context.commit('setDetails', res.data.collectorTaskDetails)
 
 				if (Formats.methods.getStatusBadge(context.state.task) === 'finished'
 					&& context.state.detailsInfo.filestotal === 0 && context.state.detailsInfo.filessize === 0) {
-					context.dispatch('getDetailFilesTotalSize')
+					context.dispatch('getDetailFilesTotalSize', taskId)
 				}
 			}
 			return res
@@ -352,8 +352,8 @@ const actions = {
 	 * @param {object} context the store object
 	 * @return {Promise<object>} request data (collectorTaskInfo: target/exclude directories info)
 	 */
-	async getTaskInfo(context) {
-		return axios.get(generateUrl(`/apps/mediadc/api/v1/tasks/${context.rootState.route.params.taskId}/info`)).then(res => {
+	async getTaskInfo(context, taskId) {
+		return axios.get(generateUrl(`/apps/mediadc/api/v1/tasks/${taskId}/info`)).then(res => {
 			context.commit('setTaskInfo', res.data.collectorTaskInfo)
 			return res
 		})
@@ -365,8 +365,7 @@ const actions = {
 	 * @param {object} context the store object
 	 * @return {Promise<object>} request data (task details filessize and filestotal)
 	 */
-	async getDetailFilesTotalSize(context) {
-		const taskId = context.rootState.route.params.taskId
+	async getDetailFilesTotalSize(context, taskId) {
 		return axios.get(generateUrl(`/apps/mediadc/api/v1/tasks/${taskId}/filestotal`)).then(res => {
 			context.commit('setDetailsInfo', { filessize: res.data.filessize, filestotal: res.data.filestotal })
 			return res

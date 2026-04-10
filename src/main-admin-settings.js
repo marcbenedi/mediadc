@@ -25,22 +25,20 @@
 import { generateFilePath } from '@nextcloud/router'
 import { getRequestToken } from '@nextcloud/auth'
 import { translate, translatePlural } from '@nextcloud/l10n'
-import { Tooltip } from '@nextcloud/vue'
+import { VTooltip as Tooltip } from 'floating-vue' // eslint-disable-line n/no-extraneous-import
+import { createApp } from 'vue'
 
-import Vue from 'vue'
 import AdminSettings from './components/settings/AdminSettings.vue'
-
-Vue.directive('tooltip', Tooltip)
 
 // eslint-disable-next-line
 __webpack_nonce__ = btoa(getRequestToken())
 // eslint-disable-next-line
 __webpack_public_path__ = generateFilePath('mediadc', '', 'js/')
 
-Vue.prototype.t = translate
-Vue.prototype.n = translatePlural
-Vue.prototype.OC = window.OC
-Vue.prototype.OCA = window.OCA
-
-const View = Vue.extend(AdminSettings)
-new View().$mount('#mediadc-admin-settings')
+const app = createApp(AdminSettings)
+app.directive('tooltip', Tooltip)
+app.config.globalProperties.t = translate
+app.config.globalProperties.n = translatePlural
+app.config.globalProperties.OC = window.OC
+app.config.globalProperties.OCA = window.OCA
+app.mount('#mediadc-admin-settings')

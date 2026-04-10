@@ -1,0 +1,81 @@
+name: Build Binaries
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - platform: manylinux_x86_64
+            docker_image: python:3.11-slim
+            qemu: false
+          - platform: manylinux_aarch64
+            docker_image: python:3.11-slim
+            qemu: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU for ARM64
+        if: matrix.qemu
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Build binary
+        run: |
+          PLATFORM_FLAG=""
+          if [ "${{ matrix.qemu }}" = "true" ]; then
+            PLATFORM_FLAG="--platform linux/arm64"
+          fi
+
+          docker run --rm $PLATFORM_FLAG \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            ${{ matrix.docker_image }} \
+            bash -c "
+              apt-get update -qq && apt-get install -y -qq build-essential binutils > /dev/null 2>&1
+              pip install -q -r requirements.txt pyinstaller
+              pyinstaller --onefile --name main \
+                --hidden-import python.db_requests \
+                --hidden-import python.task \
+                --hidden-import python.images \
+                --hidden-import python.videos \
+                --hidden-import python.imagehash \
+                --hidden-import python.log \
+                --hidden-import python.bundle_info \
+                --hidden-import python.db_tables \
+                --hidden-import python.ffmpeg_probe \
+                --hidden-import python._version \
+                main.py
+            "
+
+      - name: Package binary
+        run: |
+          BINARY_NAME="mediadc_${{ matrix.platform }}"
+          mkdir -p "$BINARY_NAME"
+          cp dist/main "$BINARY_NAME/main"
+          tar czf "${BINARY_NAME}.tar.gz" "$BINARY_NAME"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mediadc_${{ matrix.platform }}
+          path: mediadc_${{ matrix.platform }}.tar.gz
+
+      - name: Attach to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: mediadc_${{ matrix.platform }}.tar.gz
+
+      - name: Clean up root-owned files
+        if: always()
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/app python:3.11-slim \
+            rm -rf /app/dist /app/build /app/main.spec

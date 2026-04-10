@@ -1,5 +1,8 @@
 module.exports = {
 	extends: [
-		'@nextcloud'
-	]
+		'@nextcloud',
+	],
+	rules: {
+		'vue/no-v-model-argument': 'off',
+	},
 };

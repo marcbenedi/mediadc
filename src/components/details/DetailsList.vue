@@ -36,7 +36,7 @@
 			</h3>
 			<div class="pagination-wrapper">
 				<div class="pagination-sorting">
-					<NcCheckboxRadioSwitch :checked.sync="sortGroups" style="margin-right: 20px;">
+					<NcCheckboxRadioSwitch v-model:checked="sortGroups" style="margin-right: 20px;">
 						{{ t('mediadc', 'Sort groups') }}
 					</NcCheckboxRadioSwitch>
 					<NcButton v-tooltip="t('mediadc', 'Sorting details by files count')"
@@ -51,7 +51,7 @@
 				<Pagination :details="(!filtered) ? details : detailsFiltered"
 					:prev-groups-page="prevGroupsPage"
 					:next-groups-page="nextGroupsPage"
-					:page.sync="page" />
+					v-model:page="page" />
 			</div>
 		</div>
 		<div v-if="details.length > 0">
@@ -144,7 +144,7 @@
 						v-show="detail.files.length > 1"
 						:key="detail.group_id"
 						class="task-details-row">
-						<DetailsListItem :detail="detail" :checked-detail-groups.sync="checkedDetailGroups" />
+						<DetailsListItem :detail="detail" v-model:checked-detail-groups="checkedDetailGroups" />
 					</div>
 				</template>
 				<template v-else>
@@ -152,7 +152,7 @@
 						v-show="detail.files.length > 1"
 						:key="detail.group_id"
 						class="task-details-row">
-						<DetailsListItem :detail="detail" :checked-detail-groups.sync="checkedDetailGroups" />
+						<DetailsListItem :detail="detail" v-model:checked-detail-groups="checkedDetailGroups" />
 					</div>
 				</template>
 			</div>
@@ -162,7 +162,7 @@
 						v-show="detail.files.length > 1"
 						:key="detail.group_id"
 						class="task-details-row">
-						<DetailsListItem :detail="detail" :checked-detail-groups.sync="checkedDetailGroups" />
+						<DetailsListItem :detail="detail" v-model:checked-detail-groups="checkedDetailGroups" />
 					</div>
 				</template>
 				<template v-else>
@@ -170,7 +170,7 @@
 						v-show="detail.files.length > 1"
 						:key="detail.group_id"
 						class="task-details-row">
-						<DetailsListItem :detail="detail" :checked-detail-groups.sync="checkedDetailGroups" />
+						<DetailsListItem :detail="detail" v-model:checked-detail-groups="checkedDetailGroups" />
 					</div>
 				</template>
 			</div>
@@ -304,7 +304,7 @@ export default {
 		this.$store.commit('setSortGroups', sortGroups !== null ? JSON.parse(sortGroups) === true : true)
 		subscribe('openNextDetailGroup', this.openNextDetailGroup)
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		unsubscribe('openNextDetailGroup', this.openNextDetailGroup)
 	},
 	methods: {

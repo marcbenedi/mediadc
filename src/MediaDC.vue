@@ -49,11 +49,11 @@
 					</NcAppNavigationItem>
 				</ul>
 			</template>
-			<AppSettings :open.sync="settingsOpened"
+			<AppSettings v-model:open="settingsOpened"
 				@close="closeSettingsModal" />
 		</NcAppNavigation>
 		<NcAppContent :class="{ 'icon-loading': loading }">
-			<router-view v-show="!loading" :loading.sync="loading" />
+			<router-view v-show="!loading" v-model:loading="loading" />
 		</NcAppContent>
 	</NcContent>
 </template>

@@ -1,3 +1,8 @@
+> **Note:** This is a fork of [cloud-py-api/mediadc](https://github.com/cloud-py-api/mediadc),
+> which was archived by the original maintainers. This fork updates the app to work
+> with Nextcloud 33, removes the `cloud_py_api` dependency, and fixes various
+> compatibility issues. AI tooling (Claude Code) was heavily used in the update process.
+
 ## This Repository is Archived
 
 We are immensely grateful to everyone who has been a part of the Nextcloud MediaDC journey. Your contributions and support have been invaluable.

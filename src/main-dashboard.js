@@ -25,8 +25,8 @@
 import { generateFilePath } from '@nextcloud/router'
 import { getRequestToken } from '@nextcloud/auth'
 import { translate, translatePlural } from '@nextcloud/l10n'
+import { createApp } from 'vue'
 
-import Vue from 'vue'
 import Dashboard from './views/Dashboard.vue'
 
 // eslint-disable-next-line
@@ -34,16 +34,15 @@ __webpack_nonce__ = btoa(getRequestToken())
 // eslint-disable-next-line
 __webpack_public_path__ = generateFilePath('mediadc', '', 'js/')
 
-Vue.prototype.t = translate
-Vue.prototype.n = translatePlural
-Vue.prototype.OC = window.OC
-Vue.prototype.OCA = window.OCA
-
 document.addEventListener('DOMContentLoaded', () => {
 	const register = OCA?.Dashboard?.register || (() => {})
 
 	register('mediadc-tasks', (el) => {
-		const View = Vue.extend(Dashboard)
-		new View().$mount(el)
+		const app = createApp(Dashboard)
+		app.config.globalProperties.t = translate
+		app.config.globalProperties.n = translatePlural
+		app.config.globalProperties.OC = window.OC
+		app.config.globalProperties.OCA = window.OCA
+		app.mount(el)
 	})
 })

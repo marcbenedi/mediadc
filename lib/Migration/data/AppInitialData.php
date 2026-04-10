@@ -67,7 +67,7 @@ class AppInitialData {
 			],
 			[
 				'name' => 'python_binary',
-				'value' => false,
+				'value' => true,
 				'displayName' => 'Use pre-compiled Python binaries',
 				'description' => 'Use Python part in binary format (located in the appdata folder)'
 			],
