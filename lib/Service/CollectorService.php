@@ -84,6 +84,7 @@ class CollectorService {
 		private readonly PythonUtilsService $cpaUtils,
 		private readonly AppDataService $appDataService,
 		private readonly IL10N $l10n,
+		private readonly AlbumService $albumService,
 		IConfig $config,
 	) {
 		if ($userId !== null) {
@@ -672,6 +673,12 @@ class CollectorService {
 						return $file_y['filesize'] - $file_x['filesize'];
 					}
 				);
+			}
+			// Attach album information to each file
+			$allFileIds = array_column($filesInfo, 'fileid');
+			$albumsMap = $this->albumService->getAlbumsForFiles($allFileIds);
+			for ($i = 0; $i < count($filesInfo); $i++) {
+				$filesInfo[$i]['albums'] = implode(', ', $albumsMap[$filesInfo[$i]['fileid']] ?? []);
 			}
 			return [
 				'files' => $filesInfo,

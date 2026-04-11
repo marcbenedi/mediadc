@@ -69,6 +69,9 @@
 			<span :class="{ filename: !showFullFilePath, filepath: showFullFilePath }" :title="file.filepath">{{ !showFullFilePath ? file.filename : file.filepath }}</span>
 			<span class="owner">{{ file.fileowner }}</span>
 			<span class="size" :title="file.filesize + ' B'">{{ formatBytes(Number(file.filesize)) }}</span>
+			<span v-if="file.albums" class="albums" :title="file.albums">
+				{{ file.albums }}
+			</span>
 			<div class="actions" style="display: flex;">
 				<NcCheckboxRadioSwitch v-tooltip="{ content: t('mediadc', 'Select file'), placement: 'top' }"
 					class="mediadc-checkbox-only"
@@ -386,5 +389,14 @@ body[data-theme-dark] .placeholder {
 	border-bottom: 1px solid var(--color-border-dark);
 	padding-bottom: 5px;
 	margin-bottom: 5px;
+}
+
+.albums {
+	width: 100%;
+	overflow-x: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 0.85em;
+	color: var(--color-text-maxcontrast);
 }
 </style>
