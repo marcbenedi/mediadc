@@ -67,5 +67,9 @@ return [
 		['name' => 'collector#deleteTaskDetailGroupsFiles', 'url' => '/api/v1/tasks/{taskId}/details/delete', 'verb' => 'POST'],
 		['name' => 'collector#removeTaskDetailFiles', 'url' => '/api/v1/tasks/{taskId}/files/{groupId}/remove', 'verb' => 'POST'],
 		['name' => 'collector#deleteTaskDetailFiles', 'url' => '/api/v1/tasks/{taskId}/files/{groupId}/delete', 'verb' => 'POST'],
+
+		// ALBUMS API
+		['name' => 'collector#getUserAlbums', 'url' => '/api/v1/albums', 'verb' => 'GET'],
+		['name' => 'collector#addFileToAlbum', 'url' => '/api/v1/tasks/{taskId}/files/{groupId}/{fileId}/album/{albumId}', 'verb' => 'POST'],
 	]
 ];

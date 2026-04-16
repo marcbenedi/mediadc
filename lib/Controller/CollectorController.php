@@ -30,6 +30,7 @@ namespace OCA\MediaDC\Controller;
 
 use OCA\MediaDC\AppInfo\Application;
 use OCA\MediaDC\Db\CollectorTask;
+use OCA\MediaDC\Service\AlbumService;
 use OCA\MediaDC\Service\CollectorService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
@@ -45,6 +46,7 @@ class CollectorController extends Controller {
 	public function __construct(
 		IRequest $request,
 		private readonly CollectorService $service,
+		private readonly AlbumService $albumService,
 	) {
 		parent::__construct(Application::APP_ID, $request);
 	}
@@ -253,5 +255,18 @@ class CollectorController extends Controller {
 	#[NoCSRFRequired]
 	public function removeTaskDetailFiles(int $taskId, int $groupId, array $fileIds): JSONResponse {
 		return new JSONResponse($this->service->removeTaskDetailFiles($taskId, $groupId, $fileIds), Http::STATUS_OK);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function getUserAlbums(): JSONResponse {
+		return new JSONResponse(['albums' => $this->albumService->getAlbumsForUser()], Http::STATUS_OK);
+	}
+
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function addFileToAlbum(int $taskId, int $groupId, int $fileId, int $albumId): JSONResponse {
+		unset($taskId, $groupId);
+		return new JSONResponse($this->albumService->addFileToAlbum($albumId, $fileId), Http::STATUS_OK);
 	}
 }
