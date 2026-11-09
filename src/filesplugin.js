@@ -24,7 +24,7 @@
 
 import axios from '@nextcloud/axios'
 import { showInfo } from '@nextcloud/dialogs'
-import { FileAction, registerFileAction, FileType } from '@nextcloud/files'
+import { registerFileAction, FileType } from '@nextcloud/files'
 import { generateUrl } from '@nextcloud/router'
 
 // eslint-disable-next-line
@@ -68,24 +68,24 @@ function getStaticAppSvgInlineIcon() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-	const action = new FileAction({
+	registerFileAction({
 		id: 'mediadc-scan',
 		displayName: () => t('mediadc', 'Scan for duplicates'),
 		iconSvgInline: () => getStaticAppSvgInlineIcon(),
 		order: 80,
-		enabled(nodes) {
+		enabled({ nodes }) {
 			if (nodes.length !== 1) {
 				return false
 			}
 
 			return (nodes[0].type === FileType.Folder)
 		},
-		async exec(node) {
+		async exec({ nodes }) {
+			const node = nodes[0]
 			createNewTaskFromFolder(node.fileid, node.dirname + node.basename).then(() => {
 				showInfo(t('mediadc', 'New task for folder scan successfully created'))
 			})
 			return null
 		},
 	})
-	registerFileAction(action)
 })

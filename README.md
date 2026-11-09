@@ -6,7 +6,7 @@ This is a fork of [cloud-py-api/mediadc](https://github.com/cloud-py-api/mediadc
 
 The original repository was archived as the maintainers no longer had capacity to keep it going. I forked it because I rely on MediaDC for my own Nextcloud setup and wanted to keep it working with recent versions.
 
-This fork was updated almost entirely using LLM tooling ([Claude Code](https://claude.ai/code)). It brings compatibility with **Nextcloud 34**, removes the `cloud_py_api` dependency, migrates the frontend to **Vue 3**, and ships **pre-compiled Python binaries** so you don't need Python installed on your server.
+This fork was updated almost entirely using LLM tooling ([Claude Code](https://claude.ai/code)). It brings compatibility with **Nextcloud 35**, removes the `cloud_py_api` dependency, migrates the frontend to **Vue 3**, and ships **pre-compiled Python binaries** so you don't need Python installed on your server.
 
 ## Installation
 

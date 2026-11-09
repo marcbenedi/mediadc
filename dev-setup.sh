@@ -52,14 +52,14 @@ do_setup() {
       mariadb:11
 
     # Start Nextcloud
-    echo "Starting Nextcloud 34..."
+    echo "Starting Nextcloud 35..."
     docker run -d \
       --name "$CONTAINER_NAME" \
       --network "$NETWORK_NAME" \
       -p "$PORT:80" \
       -v "$VOLUME_NAME:/var/www/html" \
       -v "$APP_DIR:/var/www/html/custom_apps/mediadc" \
-      nextcloud:34
+      nextcloud:35
 
     # Wait for MariaDB
     echo "Waiting for MariaDB..."

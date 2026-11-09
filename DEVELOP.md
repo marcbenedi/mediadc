@@ -7,7 +7,7 @@
 ```
 
 This destroys any existing dev container and creates a fresh one:
-- MariaDB 11 + Nextcloud 34 at http://localhost:8080 (admin/admin)
+- MariaDB 11 + Nextcloud 35 at http://localhost:8080 (admin/admin)
 - MediaDC app mounted from local directory
 - Python 3.13 + pip + ffmpeg + all Python deps installed
 - Pre-compiled binary auto-downloaded on app enable
@@ -69,7 +69,7 @@ attaches them to the release.
 
 ## What Works
 
-- [x] App installs and enables on NC 34 with MariaDB
+- [x] App installs and enables on NC 35 with MariaDB
 - [x] Vue 3 frontend with @nextcloud/vue 9
 - [x] Admin settings page (toggles, system info)
 - [x] Task creation from MediaDC UI
